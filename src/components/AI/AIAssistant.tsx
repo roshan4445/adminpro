@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, MessageSquare, X, Send, Mic, MicOff, Volume2, Languages, Loader2 } from 'lucide-react';
+import { Bot, MessageSquare, X, Send, Mic, MicOff, Volume2, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,8 +27,7 @@ export function AIAssistant({ role }: AIAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { 
@@ -205,7 +204,7 @@ export function AIAssistant({ role }: AIAssistantProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Bot className="h-4 w-4 md:h-5 md:w-5" />
-                    <CardTitle className="text-base md:text-lg">AI Assistant</CardTitle>
+                    <CardTitle className="text-base md:text-lg">{t('ai.assistant')}</CardTitle>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs">
@@ -325,7 +324,7 @@ export function AIAssistant({ role }: AIAssistantProps) {
                       onClick={() => setInputValue('Show high priority complaints')}
                       className="text-xs h-5 md:h-6 px-2"
                     >
-                      🔥 Priority
+                      🔥 {t('ai.priority')}
                     </Button>
                     <Button
                       variant="outline"
@@ -333,7 +332,7 @@ export function AIAssistant({ role }: AIAssistantProps) {
                       onClick={() => setInputValue('Summarize recent complaints')}
                       className="text-xs h-5 md:h-6 px-2"
                     >
-                      📋 Summary
+                      📋 {t('ai.summary')}
                     </Button>
                     <Button
                       variant="outline"
@@ -341,7 +340,7 @@ export function AIAssistant({ role }: AIAssistantProps) {
                       onClick={() => setInputValue('Help me with navigation')}
                       className="text-xs h-5 md:h-6 px-2"
                     >
-                      ❓ Help
+                      ❓ {t('ai.help')}
                     </Button>
                   </div>
                 </div>

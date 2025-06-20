@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Download, Loader2 } from 'lucide-react';
+import { Search, Download, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +9,7 @@ import { ComplaintModal } from './ComplaintModal';
 import { mockComplaints } from '@/data/mockData';
 import { Complaint } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface ComplaintsPanelProps {
   role?: 'state' | 'district' | 'mandal';
@@ -25,14 +26,16 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const filteredComplaints = useMemo(() => {
     return complaints.filter((complaint) => {
+      const searchLower = searchTerm.toLowerCase();
       const matchesSearch = 
-        complaint.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        complaint.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        complaint.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        complaint.description.toLowerCase().includes(searchTerm.toLowerCase());
+        complaint.name.toLowerCase().includes(searchLower) ||
+        complaint.title.toLowerCase().includes(searchLower) ||
+        complaint.location.toLowerCase().includes(searchLower) ||
+        complaint.description.toLowerCase().includes(searchLower);
       
       const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter;
       const matchesCategory = categoryFilter === 'all' || complaint.category === categoryFilter;
@@ -59,7 +62,7 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
       await new Promise(resolve => setTimeout(resolve, 2000));
       toast({
         title: "Download Started",
-        description: "Complaints report is being generated...",
+        description: t('complaints.exportReport') + " is being generated...",
       });
     } finally {
       setIsLoading(false);
@@ -69,10 +72,10 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
   const categories = [...new Set(complaints.map(c => c.category))];
 
   const getRoleTitle = () => {
-    if (role === 'state') return 'State Complaint Management';
-    if (role === 'district') return `District ${district?.toUpperCase()} Complaints`;
-    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Complaints`;
-    return 'Complaint Management';
+    if (role === 'state') return t('complaints.stateManagement');
+    if (role === 'district') return `${t('complaints.districtManagement')} - ${district?.toUpperCase()}`;
+    if (role === 'mandal') return `${t('complaints.mandalManagement')} - ${mandal?.toUpperCase()}`;
+    return t('complaints.management');
   };
 
   return (
@@ -88,7 +91,7 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
           <div>
             <h2 className="text-xl md:text-2xl font-bold">{getRoleTitle()}</h2>
             <p className="text-sm md:text-base text-muted-foreground">
-              Manage and respond to public service complaints
+              {t('complaints.manageRespond')}
             </p>
           </div>
           
@@ -102,7 +105,7 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
             ) : (
               <Download className="h-4 w-4" />
             )}
-            <span>{isLoading ? 'Generating...' : 'Export Report'}</span>
+            <span>{isLoading ? t('common.loading') : t('complaints.exportReport')}</span>
           </Button>
         </div>
 
@@ -111,7 +114,7 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name, title, location, or description..."
+              placeholder={t('complaints.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -121,22 +124,22 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="All Status" />
+                <SelectValue placeholder={t('complaints.allStatus')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Resolved">Resolved</SelectItem>
+                <SelectItem value="all">{t('complaints.allStatus')}</SelectItem>
+                <SelectItem value="Pending">{t('complaints.pending')}</SelectItem>
+                <SelectItem value="In Progress">{t('complaints.inProgress')}</SelectItem>
+                <SelectItem value="Resolved">{t('complaints.resolved')}</SelectItem>
               </SelectContent>
             </Select>
             
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder={t('complaints.allCategories')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{t('complaints.allCategories')}</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category}
@@ -154,25 +157,25 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
           <div className="text-lg md:text-2xl font-bold text-yellow-700 dark:text-yellow-300">
             {complaints.filter(c => c.status === 'Pending').length}
           </div>
-          <div className="text-xs md:text-sm text-yellow-600 dark:text-yellow-400">Pending</div>
+          <div className="text-xs md:text-sm text-yellow-600 dark:text-yellow-400">{t('complaints.pending')}</div>
         </div>
         <div className="bg-blue-50 dark:bg-blue-900/20 p-3 md:p-4 rounded-lg">
           <div className="text-lg md:text-2xl font-bold text-blue-700 dark:text-blue-300">
             {complaints.filter(c => c.status === 'In Progress').length}
           </div>
-          <div className="text-xs md:text-sm text-blue-600 dark:text-blue-400">In Progress</div>
+          <div className="text-xs md:text-sm text-blue-600 dark:text-blue-400">{t('complaints.inProgress')}</div>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 p-3 md:p-4 rounded-lg">
           <div className="text-lg md:text-2xl font-bold text-green-700 dark:text-green-300">
             {complaints.filter(c => c.status === 'Resolved').length}
           </div>
-          <div className="text-xs md:text-sm text-green-600 dark:text-green-400">Resolved</div>
+          <div className="text-xs md:text-sm text-green-600 dark:text-green-400">{t('complaints.resolved')}</div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-900/20 p-3 md:p-4 rounded-lg">
           <div className="text-lg md:text-2xl font-bold text-gray-700 dark:text-gray-300">
             {complaints.length}
           </div>
-          <div className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Total</div>
+          <div className="text-xs md:text-sm text-gray-600 dark:text-gray-400">{t('complaints.total')}</div>
         </div>
       </div>
 

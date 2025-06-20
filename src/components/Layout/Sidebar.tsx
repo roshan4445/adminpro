@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   activeSection: string;
@@ -23,20 +24,21 @@ interface SidebarProps {
   isMobile?: boolean;
 }
 
-const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'complaints', label: 'Complaints', icon: AlertTriangle },
-  { id: 'schemes', label: 'Schemes', icon: Megaphone },
-  { id: 'traffic', label: 'Traffic Issues', icon: Car },
-  { id: 'elderly', label: 'Elderly Skills', icon: Users },
-  { id: 'scam-alerts', label: 'Scam Alerts', icon: Shield },
-  { id: 'admin-tools', label: 'Admin Tools', icon: Settings }
-];
-
 export function Sidebar({ activeSection, onSectionChange, role, isMobile = false }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { adminCode } = useAuth();
+  const { t } = useTranslation();
+
+  const menuItems = [
+    { id: 'dashboard', labelKey: 'nav.dashboard', icon: Home },
+    { id: 'complaints', labelKey: 'nav.complaints', icon: AlertTriangle },
+    { id: 'schemes', labelKey: 'nav.schemes', icon: Megaphone },
+    { id: 'traffic', labelKey: 'nav.traffic', icon: Car },
+    { id: 'elderly', labelKey: 'nav.elderly', icon: Users },
+    { id: 'scam-alerts', labelKey: 'nav.scamAlerts', icon: Shield },
+    { id: 'admin-tools', labelKey: 'nav.adminTools', icon: Settings }
+  ];
 
   const handleSectionChange = (section: string) => {
     onSectionChange(section);
@@ -96,7 +98,7 @@ export function Sidebar({ activeSection, onSectionChange, role, isMobile = false
                       onClick={() => handleSectionChange(item.id)}
                     >
                       <Icon className="mr-3 h-4 w-4" />
-                      {item.label}
+                      {t(item.labelKey)}
                     </Button>
                   );
                 })}
@@ -148,7 +150,7 @@ export function Sidebar({ activeSection, onSectionChange, role, isMobile = false
               onClick={() => handleSectionChange(item.id)}
             >
               <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-              {!isCollapsed && item.label}
+              {!isCollapsed && t(item.labelKey)}
             </Button>
           );
         })}

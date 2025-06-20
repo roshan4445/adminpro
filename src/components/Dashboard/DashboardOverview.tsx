@@ -3,6 +3,7 @@ import { StatsCards } from './StatsCards';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockDashboardStats } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardOverviewProps {
   role?: 'state' | 'district' | 'mandal';
@@ -28,11 +29,13 @@ const categoryData = [
 ];
 
 export function DashboardOverview({ role = 'state', district, mandal }: DashboardOverviewProps) {
+  const { t } = useTranslation();
+
   const getRoleTitle = () => {
-    if (role === 'state') return 'State Overview';
-    if (role === 'district') return `District ${district?.toUpperCase()} Overview`;
-    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Overview`;
-    return 'Dashboard Overview';
+    if (role === 'state') return t('dashboard.stateOverview');
+    if (role === 'district') return `${t('dashboard.districtOverview')} - ${district?.toUpperCase()}`;
+    if (role === 'mandal') return `${t('dashboard.mandalOverview')} - ${mandal?.toUpperCase()}`;
+    return t('dashboard.overview');
   };
 
   return (
@@ -45,7 +48,7 @@ export function DashboardOverview({ role = 'state', district, mandal }: Dashboar
       <div>
         <h2 className="text-xl md:text-2xl font-bold">{getRoleTitle()}</h2>
         <p className="text-sm md:text-base text-muted-foreground">
-          Real-time insights and analytics for civic management
+          {t('dashboard.realTimeInsights')}
         </p>
       </div>
 
@@ -54,7 +57,7 @@ export function DashboardOverview({ role = 'state', district, mandal }: Dashboar
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base md:text-lg">Weekly Complaint Trends</CardTitle>
+            <CardTitle className="text-base md:text-lg">{t('dashboard.weeklyTrends')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250} className="md:h-[300px]">
@@ -72,7 +75,7 @@ export function DashboardOverview({ role = 'state', district, mandal }: Dashboar
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base md:text-lg">Complaint Categories</CardTitle>
+            <CardTitle className="text-base md:text-lg">{t('dashboard.complaintCategories')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250} className="md:h-[300px]">
