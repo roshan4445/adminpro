@@ -30,6 +30,21 @@ export interface Scheme {
   email?: string;
   documents?: string;
   description?: string;
+  // Administrative scheme metadata (for scheme creation)
+  schemeCode?: string;
+  category?: string;
+  objectives?: string;
+  eligibilityCriteria?: string;
+  targetBeneficiaries?: string;
+  budgetAllocation?: string;
+  maxIncomeLimit?: string;
+  ageLimit?: string;
+  launchDate?: string;
+  applicationDeadline?: string;
+  implementingDepartment?: string;
+  contactDetails?: string;
+  requiredDocuments?: string;
+  benefits?: string;
 }
 
 export interface TrafficIssue {
