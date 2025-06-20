@@ -9,6 +9,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -17,16 +19,31 @@ interface HeaderProps {
 }
 
 export function Header({ title }: HeaderProps) {
-  const { logout, adminCode, userRole } = useAuth();
+  const { logout, user, userRole } = useAuth();
+
+  const getUserInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'state': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300';
+      case 'district': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
+      case 'mandal': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
+    }
+  };
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
       <div className="flex h-14 md:h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center space-x-2 md:space-x-4">
           <h1 className="text-lg md:text-2xl font-semibold ml-12 md:ml-0 truncate">{title}</h1>
-          <Badge variant="outline" className="hidden sm:inline-flex text-xs">
-            {adminCode?.toUpperCase()} - {userRole?.toUpperCase()}
-          </Badge>
+          {user && (
+            <Badge variant="outline" className={`hidden sm:inline-flex text-xs ${getRoleBadgeColor(userRole || '')}`}>
+              {userRole?.toUpperCase()} - {user.district || user.mandal || 'STATE'}
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center space-x-2 md:space-x-4">
@@ -48,13 +65,26 @@ export function Header({ title }: HeaderProps) {
               <Button variant="ghost" className="relative h-7 w-7 md:h-8 md:w-8 rounded-full">
                 <Avatar className="h-7 w-7 md:h-8 md:w-8">
                   <AvatarImage src="" />
-                  <AvatarFallback>
-                    <User className="h-3 w-3 md:h-4 md:w-4" />
+                  <AvatarFallback className="text-xs">
+                    {user ? getUserInitials(user.name) : <User className="h-3 w-3 md:h-4 md:w-4" />}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
+              {user && (
+                <>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuItem onClick={logout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>

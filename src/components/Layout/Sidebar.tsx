@@ -27,7 +27,7 @@ interface SidebarProps {
 export function Sidebar({ activeSection, onSectionChange, role, isMobile = false }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { adminCode } = useAuth();
+  const { user } = useAuth();
   const { t } = useTranslation();
 
   const menuItems = [
@@ -90,9 +90,15 @@ export function Sidebar({ activeSection, onSectionChange, role, isMobile = false
               <div className="p-6">
                 <h2 className="text-xl font-bold">Smart Civic Portal</h2>
                 <p className="text-sm text-muted-foreground">Intelligence System</p>
-                <Badge className={`mt-2 ${getRoleBadgeColor(role)}`}>
-                  {adminCode?.toUpperCase()} - {role.toUpperCase()}
-                </Badge>
+                {user && (
+                  <div className="mt-3 space-y-1">
+                    <Badge className={`${getRoleBadgeColor(role)} text-xs`}>
+                      {role.toUpperCase()}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground truncate">{user.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                )}
               </div>
               <nav className="px-4 space-y-2">
                 {menuItems.map((item) => {
@@ -128,9 +134,15 @@ export function Sidebar({ activeSection, onSectionChange, role, isMobile = false
             <div>
               <h2 className="text-xl font-bold">Smart Civic Portal</h2>
               <p className="text-sm text-muted-foreground">Intelligence System</p>
-              <Badge className={`mt-2 ${getRoleBadgeColor(role)}`}>
-                {adminCode?.toUpperCase()} - {role.toUpperCase()}
-              </Badge>
+              {user && (
+                <div className="mt-3 space-y-1">
+                  <Badge className={`${getRoleBadgeColor(role)} text-xs`}>
+                    {role.toUpperCase()}
+                  </Badge>
+                  <p className="text-xs text-muted-foreground truncate">{user.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                </div>
+              )}
             </div>
           )}
           <Button

@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 interface MandalDashboardProps {
   mandal: string;
+  district: string;
 }
 
 const sectionTitles = {
@@ -27,7 +28,7 @@ const sectionTitles = {
   'admin-tools': 'Mandal Admin Tools'
 };
 
-export function MandalDashboard({ mandal }: MandalDashboardProps) {
+export function MandalDashboard({ mandal, district }: MandalDashboardProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();

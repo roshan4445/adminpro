@@ -5,18 +5,18 @@ import { DistrictDashboard } from '@/components/Dashboards/DistrictDashboard';
 import { MandalDashboard } from '@/components/Dashboards/MandalDashboard';
 
 export function RoleRouter() {
-  const { adminCode, userRole } = useAuth();
+  const { user, userRole } = useAuth();
 
   const getDashboardComponent = () => {
-    if (!adminCode) return <Navigate to="/login" />;
+    if (!user) return <Navigate to="/login" />;
 
     switch (userRole) {
       case 'state':
         return <StateDashboard />;
       case 'district':
-        return <DistrictDashboard district={adminCode} />;
+        return <DistrictDashboard district={user.district || 'unknown'} />;
       case 'mandal':
-        return <MandalDashboard mandal={adminCode} />;
+        return <MandalDashboard mandal={user.mandal || 'unknown'} district={user.district || 'unknown'} />;
       default:
         return <Navigate to="/login" />;
     }
