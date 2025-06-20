@@ -173,38 +173,72 @@ export function AIAssistant({ role }: AIAssistantProps) {
 
   return (
     <>
-      {/* Floating AI Button - Responsive */}
+      {/* Floating AI Button - Enhanced with proper icon */}
       <motion.div
         className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1 }}
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ 
+          delay: 1,
+          type: "spring",
+          stiffness: 260,
+          damping: 20
+        }}
       >
         <Button
           onClick={() => setIsOpen(true)}
-          className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300"
+          className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 group relative overflow-hidden"
           size="lg"
         >
-          <Bot className="h-5 w-5 md:h-6 md:w-6 text-white" />
+          {/* Background animation */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+          
+          {/* AI Icon with animation */}
+          <motion.div
+            animate={{ 
+              scale: [1, 1.1, 1],
+              rotate: [0, 5, -5, 0]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          >
+            <Bot className="h-6 w-6 md:h-7 md:w-7 text-white relative z-10" />
+          </motion.div>
+          
+          {/* Pulse effect */}
+          <div className="absolute inset-0 rounded-full bg-blue-400 animate-ping opacity-20" />
         </Button>
       </motion.div>
 
-      {/* AI Assistant Panel - Responsive */}
+      {/* AI Assistant Panel - Enhanced with proper close button */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, x: 400 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 400 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0, x: 400, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 400, scale: 0.8 }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 200,
+              duration: 0.3
+            }}
             className="fixed inset-x-4 bottom-20 md:right-6 md:bottom-24 md:left-auto z-50 w-auto md:w-96 h-[70vh] md:h-[600px]"
           >
             <Card className="h-full shadow-2xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
               <CardHeader className="pb-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Bot className="h-4 w-4 md:h-5 md:w-5" />
-                    <CardTitle className="text-base md:text-lg">{t('ai.assistant')}</CardTitle>
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Bot className="h-5 w-5" />
+                    </motion.div>
+                    <CardTitle className="text-lg">{t('ai.assistant')}</CardTitle>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs">
@@ -214,9 +248,9 @@ export function AIAssistant({ role }: AIAssistantProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsOpen(false)}
-                      className="text-white hover:bg-white/20 h-6 w-6 md:h-8 md:w-8 p-0"
+                      className="text-white hover:bg-white/20 h-8 w-8 p-0 rounded-full transition-all duration-200 hover:scale-110"
                     >
-                      <X className="h-3 w-3 md:h-4 md:w-4" />
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

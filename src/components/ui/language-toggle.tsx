@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Globe, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Globe, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,30 +9,66 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@/hooks/use-toast';
 
 const languages = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
-  { code: 'te', name: 'తెలుగు', flag: '🇮🇳' },
-  { code: 'ur', name: 'اردو', flag: '🇵🇰' },
+  { 
+    code: 'en', 
+    name: 'English', 
+    nativeName: 'English',
+    flag: '🇺🇸',
+    countryCode: 'US'
+  },
+  { 
+    code: 'hi', 
+    name: 'Hindi', 
+    nativeName: 'हिंदी',
+    flag: '🇮🇳',
+    countryCode: 'IN'
+  },
+  { 
+    code: 'te', 
+    name: 'Telugu', 
+    nativeName: 'తెలుగు',
+    flag: '🇮🇳',
+    countryCode: 'IN'
+  },
+  { 
+    code: 'ur', 
+    name: 'Urdu', 
+    nativeName: 'اردو',
+    flag: '🇵🇰',
+    countryCode: 'PK'
+  }
 ];
 
 export function LanguageToggle() {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const [isChanging, setIsChanging] = useState(false);
+  const { toast } = useToast();
 
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
-  const changeLanguage = async (languageCode: string) => {
+  const handleLanguageChange = async (languageCode: string) => {
     if (languageCode === i18n.language) return;
     
     setIsChanging(true);
+    
     try {
       await i18n.changeLanguage(languageCode);
-      // Force a small delay to show the change is happening
-      setTimeout(() => setIsChanging(false), 300);
+      
+      const selectedLang = languages.find(lang => lang.code === languageCode);
+      toast({
+        title: "Language Changed",
+        description: `Interface language changed to ${selectedLang?.name}`,
+      });
     } catch (error) {
-      console.error('Failed to change language:', error);
+      toast({
+        title: "Language Change Failed",
+        description: "Failed to change language. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsChanging(false);
     }
   };
@@ -42,35 +79,48 @@ export function LanguageToggle() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-8 w-8 md:h-9 md:w-9 relative"
+          className="h-8 w-8 md:h-9 md:w-9 p-0 relative"
           disabled={isChanging}
         >
           {isChanging ? (
-            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <>
-              <Globe className="h-3 w-3 md:h-4 md:w-4" />
-              <span className="absolute -top-1 -right-1 text-xs">
-                {currentLanguage.flag}
-              </span>
-            </>
+            <div className="flex items-center justify-center">
+              <Globe className="h-4 w-4" />
+            </div>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      
+      <DropdownMenuContent align="end" className="w-56">
         {languages.map((language) => (
           <DropdownMenuItem
             key={language.code}
-            onClick={() => changeLanguage(language.code)}
-            className="flex items-center justify-between cursor-pointer"
+            onClick={() => handleLanguageChange(language.code)}
+            className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-accent"
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <span className="text-lg">{language.flag}</span>
-              <span className="font-medium">{language.name}</span>
+              <div className="flex flex-col">
+                <span className="font-medium text-sm">{language.name}</span>
+                <span className="text-xs text-muted-foreground">{language.nativeName}</span>
+              </div>
             </div>
-            {i18n.language === language.code && (
-              <Check className="h-4 w-4 text-green-600" />
-            )}
+            
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">
+                {language.countryCode}
+              </span>
+              {i18n.language === language.code && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                >
+                  <Check className="h-4 w-4 text-green-600" />
+                </motion.div>
+              )}
+            </div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
