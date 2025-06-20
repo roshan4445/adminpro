@@ -12,11 +12,14 @@ import {
   X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  role: 'state' | 'district' | 'mandal';
   isMobile?: boolean;
 }
 
@@ -30,14 +33,24 @@ const menuItems = [
   { id: 'admin-tools', label: 'Admin Tools', icon: Settings }
 ];
 
-export function Sidebar({ activeSection, onSectionChange, isMobile = false }: SidebarProps) {
+export function Sidebar({ activeSection, onSectionChange, role, isMobile = false }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { adminCode } = useAuth();
 
   const handleSectionChange = (section: string) => {
     onSectionChange(section);
     if (isMobile) {
       setIsMobileOpen(false);
+    }
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'state': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300';
+      case 'district': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
+      case 'mandal': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
     }
   };
 
@@ -66,8 +79,11 @@ export function Sidebar({ activeSection, onSectionChange, isMobile = false }: Si
             />
             <motion.aside className="relative w-64 h-full bg-background border-r shadow-lg">
               <div className="p-6">
-                <h2 className="text-xl font-bold">Admin Portal</h2>
-                <p className="text-sm text-muted-foreground">Government Services</p>
+                <h2 className="text-xl font-bold">Smart Civic Portal</h2>
+                <p className="text-sm text-muted-foreground">Intelligence System</p>
+                <Badge className={`mt-2 ${getRoleBadgeColor(role)}`}>
+                  {adminCode?.toUpperCase()} - {role.toUpperCase()}
+                </Badge>
               </div>
               <nav className="px-4 space-y-2">
                 {menuItems.map((item) => {
@@ -101,8 +117,11 @@ export function Sidebar({ activeSection, onSectionChange, isMobile = false }: Si
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div>
-              <h2 className="text-xl font-bold">Admin Portal</h2>
-              <p className="text-sm text-muted-foreground">Government Services</p>
+              <h2 className="text-xl font-bold">Smart Civic Portal</h2>
+              <p className="text-sm text-muted-foreground">Intelligence System</p>
+              <Badge className={`mt-2 ${getRoleBadgeColor(role)}`}>
+                {adminCode?.toUpperCase()} - {role.toUpperCase()}
+              </Badge>
             </div>
           )}
           <Button

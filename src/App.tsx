@@ -1,76 +1,40 @@
-import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
-import { Sidebar } from '@/components/Layout/Sidebar';
-import { Header } from '@/components/Layout/Header';
-import { DashboardOverview } from '@/components/Dashboard/DashboardOverview';
-import { ComplaintsPanel } from '@/components/Complaints/ComplaintsPanel';
-import { SchemesPanel } from '@/components/Schemes/SchemesPanel';
-import { TrafficPanel } from '@/components/Traffic/TrafficPanel';
-import { ElderlyPanel } from '@/components/Elderly/ElderlyPanel';
-import { ScamPanel } from '@/components/Scam/ScamPanel';
-import { AdminToolsPanel } from '@/components/AdminTools/AdminToolsPanel';
-
-const sectionTitles = {
-  dashboard: 'Dashboard Overview',
-  complaints: 'Complaint Management',
-  schemes: 'Schemes Management',
-  traffic: 'Traffic & City Issues',
-  elderly: 'Elderly Skill Program',
-  'scam-alerts': 'Scam Reports & Alerts',
-  'admin-tools': 'Admin Tools'
-};
+import { LoginPage } from '@/components/Auth/LoginPage';
+import { RoleRouter } from '@/components/Auth/RoleRouter';
+import { useAuth } from '@/hooks/useAuth';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '@/lib/i18n';
+import './App.css';
 
 function App() {
-  const [activeSection, setActiveSection] = useState('dashboard');
-
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'dashboard':
-        return <DashboardOverview />;
-      case 'complaints':
-        return <ComplaintsPanel />;
-      case 'schemes':
-        return <SchemesPanel />;
-      case 'traffic':
-        return <TrafficPanel />;
-      case 'elderly':
-        return <ElderlyPanel />;
-      case 'scam-alerts':
-        return <ScamPanel />;
-      case 'admin-tools':
-        return <AdminToolsPanel />;
-      default:
-        return <DashboardOverview />;
-    }
-  };
+  const { isAuthenticated } = useAuth();
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <div className="flex h-screen bg-background">
-        <Sidebar 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection}
-        />
-        <Sidebar 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection}
-          isMobile={true}
-        />
-        
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header title={sectionTitles[activeSection as keyof typeof sectionTitles]} />
-          
-          <main className="flex-1 overflow-y-auto">
-            <div className="container mx-auto p-6">
-              {renderContent()}
-            </div>
-          </main>
-        </div>
-      </div>
-      
-      <Toaster />
-    </ThemeProvider>
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <Router>
+          <div className="min-h-screen bg-background">
+            <Routes>
+              <Route 
+                path="/login" 
+                element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />} 
+              />
+              <Route 
+                path="/dashboard/*" 
+                element={isAuthenticated ? <RoleRouter /> : <Navigate to="/login" />} 
+              />
+              <Route 
+                path="/" 
+                element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} 
+              />
+            </Routes>
+          </div>
+          <Toaster />
+        </Router>
+      </ThemeProvider>
+    </I18nextProvider>
   );
 }
 
