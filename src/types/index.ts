@@ -24,6 +24,12 @@ export interface Scheme {
   status: 'Applied' | 'Under Review' | 'Approved' | 'Rejected';
   appliedAt: string;
   isNew?: boolean;
+  // Extended fields for new scheme applications
+  address?: string;
+  phoneNumber?: string;
+  email?: string;
+  documents?: string;
+  description?: string;
 }
 
 export interface TrafficIssue {

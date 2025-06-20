@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AddSchemeModal } from './AddSchemeModal';
 import { mockSchemes } from '@/data/mockData';
 import { Scheme } from '@/types';
 import { format } from 'date-fns';
@@ -29,6 +30,7 @@ export function SchemesPanel({ role = 'state', district, mandal }: SchemesPanelP
   const [schemes, setSchemes] = useState<Scheme[]>(mockSchemes);
   const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { toast } = useToast();
@@ -54,6 +56,10 @@ export function SchemesPanel({ role = 'state', district, mandal }: SchemesPanelP
       title: "Status Updated",
       description: `Scheme status has been updated to ${newStatus}.`,
     });
+  };
+
+  const handleAddScheme = (newScheme: Scheme) => {
+    setSchemes(prev => [newScheme, ...prev]);
   };
 
   const handleBulkApprove = () => {
@@ -96,7 +102,7 @@ export function SchemesPanel({ role = 'state', district, mandal }: SchemesPanelP
             <CheckCircle className="h-4 w-4 mr-2" />
             Bulk Approve
           </Button>
-          <Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             New Scheme
           </Button>
@@ -288,6 +294,13 @@ export function SchemesPanel({ role = 'state', district, mandal }: SchemesPanelP
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Add Scheme Modal */}
+      <AddSchemeModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddScheme={handleAddScheme}
+      />
     </motion.div>
   );
 }
