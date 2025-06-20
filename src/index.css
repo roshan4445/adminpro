@@ -234,3 +234,124 @@ textarea:focus-visible {
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-muted-foreground/50;
 }
+
+/* Enhanced AI Assistant Structured Content Styling */
+.structured-content {
+  @apply leading-relaxed;
+}
+
+.structured-content h1 {
+  @apply text-lg font-bold text-blue-600 dark:text-blue-400 mb-3 pb-2 border-b border-blue-200 dark:border-blue-800;
+}
+
+.structured-content h2 {
+  @apply text-base font-semibold text-gray-800 dark:text-gray-200 mt-4 mb-2;
+}
+
+.structured-content h3 {
+  @apply text-sm font-medium text-gray-700 dark:text-gray-300 mt-3 mb-1;
+}
+
+.structured-content p {
+  @apply mb-2;
+}
+
+.structured-content strong {
+  @apply font-semibold text-gray-900 dark:text-gray-100;
+}
+
+/* Status indicators */
+.structured-content:contains("🔴") {
+  @apply text-red-600 dark:text-red-400;
+}
+
+.structured-content:contains("🟡") {
+  @apply text-yellow-600 dark:text-yellow-400;
+}
+
+.structured-content:contains("🟢") {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.structured-content:contains("✅") {
+  @apply text-green-700 dark:text-green-300;
+}
+
+.structured-content:contains("⏳") {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+/* Action items styling */
+.structured-content:contains("💡") {
+  @apply bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-4 border-blue-400;
+}
+
+/* Department and location styling */
+.structured-content:contains("🏢") {
+  @apply text-purple-600 dark:text-purple-400;
+}
+
+.structured-content:contains("📍") {
+  @apply text-indigo-600 dark:text-indigo-400;
+}
+
+/* Monetary values */
+.structured-content:contains("💰") {
+  @apply text-green-600 dark:text-green-400 font-medium;
+}
+
+/* Separator line styling */
+.structured-content hr {
+  @apply border-gray-300 dark:border-gray-600 my-3;
+}
+
+/* Code and monospace text */
+.structured-content code {
+  @apply bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs font-mono;
+}
+
+/* Lists and bullet points */
+.structured-content ul {
+  @apply space-y-1 ml-4;
+}
+
+.structured-content li {
+  @apply text-sm;
+}
+
+/* Responsive text sizing for structured content */
+@media (max-width: 768px) {
+  .structured-content h1 {
+    @apply text-base;
+  }
+  
+  .structured-content h2 {
+    @apply text-sm;
+  }
+  
+  .structured-content h3 {
+    @apply text-xs;
+  }
+}
+
+/* Enhanced message bubble styling for AI responses */
+.structured-content {
+  @apply max-w-none;
+}
+
+/* Ensure proper spacing in structured responses */
+.structured-content > * + * {
+  @apply mt-2;
+}
+
+.structured-content h1 + * {
+  @apply mt-3;
+}
+
+.structured-content h2 + * {
+  @apply mt-2;
+}
+
+.structured-content h3 + * {
+  @apply mt-1;
+}
