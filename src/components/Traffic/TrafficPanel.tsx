@@ -13,6 +13,12 @@ import { TrafficIssue } from '@/types';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
+interface TrafficPanelProps {
+  role?: 'state' | 'district' | 'mandal';
+  district?: string;
+  mandal?: string;
+}
+
 const statusColors = {
   'Pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
   'Resolved': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
@@ -25,7 +31,7 @@ const departments = [
   'Electrical Department'
 ];
 
-export function TrafficPanel() {
+export function TrafficPanel({ role = 'state', district, mandal }: TrafficPanelProps) {
   const [issues, setIssues] = useState<TrafficIssue[]>(mockTrafficIssues);
   const [selectedIssue, setSelectedIssue] = useState<TrafficIssue | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,6 +77,13 @@ export function TrafficPanel() {
 
   const issueTypes = [...new Set(issues.map(i => i.issueType))];
 
+  const getRoleTitle = () => {
+    if (role === 'state') return 'State Traffic & Infrastructure';
+    if (role === 'district') return `District ${district?.toUpperCase()} Traffic`;
+    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Traffic`;
+    return 'Traffic & City Issues';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -81,7 +94,7 @@ export function TrafficPanel() {
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
-          <h2 className="text-2xl font-bold">Traffic & City Issues</h2>
+          <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
           <p className="text-muted-foreground">
             Manage road issues and infrastructure problems
           </p>

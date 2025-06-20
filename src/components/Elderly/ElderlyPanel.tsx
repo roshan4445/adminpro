@@ -12,6 +12,12 @@ import { mockElderlyWorkers } from '@/data/mockData';
 import { ElderlyWorker } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
+interface ElderlyPanelProps {
+  role?: 'state' | 'district' | 'mandal';
+  district?: string;
+  mandal?: string;
+}
+
 const statusColors = {
   'Registered': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
   'Assigned Work': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
@@ -28,7 +34,7 @@ const tasks = [
   'Product Description Writing'
 ];
 
-export function ElderlyPanel() {
+export function ElderlyPanel({ role = 'state', district, mandal }: ElderlyPanelProps) {
   const [workers, setWorkers] = useState<ElderlyWorker[]>(mockElderlyWorkers);
   const [selectedWorker, setSelectedWorker] = useState<ElderlyWorker | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,6 +88,13 @@ export function ElderlyPanel() {
 
   const skills = [...new Set(workers.map(w => w.skill))];
 
+  const getRoleTitle = () => {
+    if (role === 'state') return 'State Elderly Skill Program';
+    if (role === 'district') return `District ${district?.toUpperCase()} Elderly Skills`;
+    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Elderly Skills`;
+    return 'Elderly Skill Program';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -92,7 +105,7 @@ export function ElderlyPanel() {
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
-          <h2 className="text-2xl font-bold">Elderly Skill Program</h2>
+          <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
           <p className="text-muted-foreground">
             Manage work-from-home opportunities for elderly citizens
           </p>

@@ -4,6 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockDashboardStats } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
+interface DashboardOverviewProps {
+  role?: 'state' | 'district' | 'mandal';
+  district?: string;
+  mandal?: string;
+}
+
 const chartData = [
   { name: 'Mon', complaints: 12, resolved: 8 },
   { name: 'Tue', complaints: 15, resolved: 12 },
@@ -21,13 +27,28 @@ const categoryData = [
   { name: 'Infrastructure', value: 17, color: '#ef4444' }
 ];
 
-export function DashboardOverview() {
+export function DashboardOverview({ role = 'state', district, mandal }: DashboardOverviewProps) {
+  const getRoleTitle = () => {
+    if (role === 'state') return 'State Overview';
+    if (role === 'district') return `District ${district?.toUpperCase()} Overview`;
+    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Overview`;
+    return 'Dashboard Overview';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      className="space-y-6"
     >
+      <div>
+        <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
+        <p className="text-muted-foreground">
+          Real-time insights and analytics for civic management
+        </p>
+      </div>
+
       <StatsCards stats={mockDashboardStats} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

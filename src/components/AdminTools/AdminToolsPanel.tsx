@@ -9,7 +9,13 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 
-export function AdminToolsPanel() {
+interface AdminToolsPanelProps {
+  role?: 'state' | 'district' | 'mandal';
+  district?: string;
+  mandal?: string;
+}
+
+export function AdminToolsPanel({ role = 'state', district, mandal }: AdminToolsPanelProps) {
   const [notifications, setNotifications] = useState(true);
   const [autoAssign, setAutoAssign] = useState(false);
   const [emailAlerts, setEmailAlerts] = useState(true);
@@ -36,6 +42,13 @@ export function AdminToolsPanel() {
     });
   };
 
+  const getRoleTitle = () => {
+    if (role === 'state') return 'State Admin Tools';
+    if (role === 'district') return `District ${district?.toUpperCase()} Admin Tools`;
+    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Admin Tools`;
+    return 'Admin Tools';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -44,7 +57,7 @@ export function AdminToolsPanel() {
       className="space-y-6"
     >
       <div>
-        <h2 className="text-2xl font-bold">Admin Tools</h2>
+        <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
         <p className="text-muted-foreground">
           System settings and administrative utilities
         </p>

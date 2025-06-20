@@ -1,4 +1,4 @@
-import { Languages } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,26 +18,31 @@ const languages = [
 export function LanguageToggle() {
   const { i18n } = useTranslation();
 
+  const changeLanguage = (languageCode: string) => {
+    i18n.changeLanguage(languageCode);
+  };
+
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Languages className="h-4 w-4" />
-          <span className="hidden sm:inline">{currentLanguage.flag} {currentLanguage.name}</span>
-          <span className="sm:hidden">{currentLanguage.flag}</span>
+        <Button variant="ghost" size="sm" className="h-8 w-8 px-0">
+          <Globe className="h-4 w-4" />
+          <span className="sr-only">Toggle language</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {languages.map((language) => (
           <DropdownMenuItem
             key={language.code}
-            onClick={() => i18n.changeLanguage(language.code)}
-            className="gap-2"
+            onClick={() => changeLanguage(language.code)}
+            className={`cursor-pointer ${
+              i18n.language === language.code ? 'bg-accent' : ''
+            }`}
           >
-            <span>{language.flag}</span>
-            <span>{language.name}</span>
+            <span className="mr-2">{language.flag}</span>
+            {language.name}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

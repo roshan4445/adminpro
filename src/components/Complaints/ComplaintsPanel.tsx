@@ -10,7 +10,13 @@ import { mockComplaints } from '@/data/mockData';
 import { Complaint } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
-export function ComplaintsPanel() {
+interface ComplaintsPanelProps {
+  role?: 'state' | 'district' | 'mandal';
+  district?: string;
+  mandal?: string;
+}
+
+export function ComplaintsPanel({ role = 'state', district, mandal }: ComplaintsPanelProps) {
   const [complaints, setComplaints] = useState<Complaint[]>(mockComplaints);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,6 +59,13 @@ export function ComplaintsPanel() {
 
   const categories = [...new Set(complaints.map(c => c.category))];
 
+  const getRoleTitle = () => {
+    if (role === 'state') return 'State Complaint Management';
+    if (role === 'district') return `District ${district?.toUpperCase()} Complaints`;
+    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Complaints`;
+    return 'Complaint Management';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -63,7 +76,7 @@ export function ComplaintsPanel() {
       {/* Header and Filters */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
-          <h2 className="text-2xl font-bold">Complaint Management</h2>
+          <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
           <p className="text-muted-foreground">
             Manage and respond to public service complaints
           </p>

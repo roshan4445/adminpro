@@ -13,6 +13,12 @@ import { ScamReport } from '@/types';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
+interface ScamPanelProps {
+  role?: 'state' | 'district' | 'mandal';
+  district?: string;
+  mandal?: string;
+}
+
 const statusColors = {
   'Verified': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
   'Unverified': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
@@ -26,7 +32,7 @@ const typeColors = {
   'Email Fraud': 'bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300'
 };
 
-export function ScamPanel() {
+export function ScamPanel({ role = 'state', district, mandal }: ScamPanelProps) {
   const [reports, setReports] = useState<ScamReport[]>(mockScamReports);
   const [selectedReport, setSelectedReport] = useState<ScamReport | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,6 +91,13 @@ export function ScamPanel() {
 
   const scamTypes = [...new Set(reports.map(r => r.type))];
 
+  const getRoleTitle = () => {
+    if (role === 'state') return 'State Scam Reports & Alerts';
+    if (role === 'district') return `District ${district?.toUpperCase()} Scam Reports`;
+    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Scam Reports`;
+    return 'Scam Reports & Alerts';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -95,7 +108,7 @@ export function ScamPanel() {
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
-          <h2 className="text-2xl font-bold">Scam Reports & Alerts</h2>
+          <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
           <p className="text-muted-foreground">
             Monitor and verify fraud reports from citizens
           </p>

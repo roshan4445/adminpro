@@ -12,6 +12,12 @@ import { Scheme } from '@/types';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
+interface SchemesPanelProps {
+  role?: 'state' | 'district' | 'mandal';
+  district?: string;
+  mandal?: string;
+}
+
 const statusColors = {
   'Applied': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
   'Under Review': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
@@ -19,7 +25,7 @@ const statusColors = {
   'Rejected': 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
 };
 
-export function SchemesPanel() {
+export function SchemesPanel({ role = 'state', district, mandal }: SchemesPanelProps) {
   const [schemes, setSchemes] = useState<Scheme[]>(mockSchemes);
   const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,6 +68,13 @@ export function SchemesPanel() {
     });
   };
 
+  const getRoleTitle = () => {
+    if (role === 'state') return 'State Schemes Management';
+    if (role === 'district') return `District ${district?.toUpperCase()} Schemes`;
+    if (role === 'mandal') return `Mandal ${mandal?.toUpperCase()} Schemes`;
+    return 'Schemes Management';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -72,7 +85,7 @@ export function SchemesPanel() {
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
-          <h2 className="text-2xl font-bold">Schemes Management</h2>
+          <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
           <p className="text-muted-foreground">
             Manage scheme applications and approvals
           </p>
@@ -254,7 +267,7 @@ export function SchemesPanel() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Eligibility</label>
-                  <p className={scheme.eligibilityMatch ? 'text-green-600' : 'text-red-600'}>
+                  <p className={selectedScheme.eligibilityMatch ? 'text-green-600' : 'text-red-600'}>
                     {selectedScheme.eligibilityMatch ? 'Eligible' : 'Not Eligible'}
                   </p>
                 </div>
