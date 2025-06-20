@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, MessageSquare, X, Send, Mic, MicOff, Volume2, Languages } from 'lucide-react';
+import { Bot, MessageSquare, X, Send, Mic, MicOff, Volume2, Languages, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ export function AIAssistant({ role }: AIAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -173,23 +174,23 @@ export function AIAssistant({ role }: AIAssistantProps) {
 
   return (
     <>
-      {/* Floating AI Button */}
+      {/* Floating AI Button - Responsive */}
       <motion.div
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 1 }}
       >
         <Button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300"
+          className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300"
           size="lg"
         >
-          <Bot className="h-6 w-6 text-white" />
+          <Bot className="h-5 w-5 md:h-6 md:w-6 text-white" />
         </Button>
       </motion.div>
 
-      {/* AI Assistant Panel */}
+      {/* AI Assistant Panel - Responsive */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -197,26 +198,26 @@ export function AIAssistant({ role }: AIAssistantProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 400 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-6 bottom-24 z-50 w-96 h-[600px]"
+            className="fixed inset-x-4 bottom-20 md:right-6 md:bottom-24 md:left-auto z-50 w-auto md:w-96 h-[70vh] md:h-[600px]"
           >
             <Card className="h-full shadow-2xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
               <CardHeader className="pb-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Bot className="h-5 w-5" />
-                    <CardTitle className="text-lg">AI Assistant</CardTitle>
+                    <Bot className="h-4 w-4 md:h-5 md:w-5" />
+                    <CardTitle className="text-base md:text-lg">AI Assistant</CardTitle>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs">
                       {role.toUpperCase()}
                     </Badge>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsOpen(false)}
-                      className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                      className="text-white hover:bg-white/20 h-6 w-6 md:h-8 md:w-8 p-0"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
                   </div>
                 </div>
@@ -224,8 +225,8 @@ export function AIAssistant({ role }: AIAssistantProps) {
               
               <CardContent className="flex flex-col h-full p-0">
                 {/* Messages */}
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
+                <ScrollArea className="flex-1 p-3 md:p-4">
+                  <div className="space-y-3 md:space-y-4">
                     {messages.map((message) => (
                       <motion.div
                         key={message.id}
@@ -234,13 +235,13 @@ export function AIAssistant({ role }: AIAssistantProps) {
                         className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[80%] p-3 rounded-lg ${
+                          className={`max-w-[85%] md:max-w-[80%] p-2 md:p-3 rounded-lg ${
                             message.type === 'user'
                               ? 'bg-blue-600 text-white'
                               : 'bg-gray-100 dark:bg-gray-800 text-foreground'
                           }`}
                         >
-                          <div className="whitespace-pre-wrap text-sm">
+                          <div className="whitespace-pre-wrap text-xs md:text-sm">
                             {message.content}
                           </div>
                           {message.type === 'assistant' && (
@@ -248,9 +249,9 @@ export function AIAssistant({ role }: AIAssistantProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleSpeak(message.content)}
-                              className="mt-2 h-6 px-2 text-xs opacity-70 hover:opacity-100"
+                              className="mt-1 md:mt-2 h-5 md:h-6 px-1 md:px-2 text-xs opacity-70 hover:opacity-100"
                             >
-                              <Volume2 className="h-3 w-3 mr-1" />
+                              <Volume2 className="h-2 w-2 md:h-3 md:w-3 mr-1" />
                               {isSpeaking ? 'Stop' : 'Speak'}
                             </Button>
                           )}
@@ -264,11 +265,11 @@ export function AIAssistant({ role }: AIAssistantProps) {
                         animate={{ opacity: 1 }}
                         className="flex justify-start"
                       >
-                        <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                        <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-3 rounded-lg">
                           <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" />
+                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                           </div>
                         </div>
                       </motion.div>
@@ -278,7 +279,7 @@ export function AIAssistant({ role }: AIAssistantProps) {
                 </ScrollArea>
                 
                 {/* Input */}
-                <div className="p-4 border-t">
+                <div className="p-3 md:p-4 border-t">
                   <div className="flex space-x-2">
                     <div className="flex-1 relative">
                       <Input
@@ -286,11 +287,11 @@ export function AIAssistant({ role }: AIAssistantProps) {
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder={t('ai.inputPlaceholder')}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        className="pr-10"
+                        className="pr-8 md:pr-10 text-sm"
                       />
                       {isListening && (
                         <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-red-500 rounded-full animate-pulse" />
                         </div>
                       )}
                     </div>
@@ -298,38 +299,47 @@ export function AIAssistant({ role }: AIAssistantProps) {
                       variant="outline"
                       size="sm"
                       onClick={handleVoiceToggle}
-                      className={`${isListening ? 'bg-red-50 border-red-200' : ''}`}
+                      className={`${isListening ? 'bg-red-50 border-red-200' : ''} h-9 w-9 md:h-10 md:w-10 p-0`}
                     >
-                      {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                      {isListening ? <MicOff className="h-3 w-3 md:h-4 md:w-4" /> : <Mic className="h-3 w-3 md:h-4 md:w-4" />}
                     </Button>
-                    <Button onClick={handleSendMessage} size="sm">
-                      <Send className="h-4 w-4" />
+                    <Button 
+                      onClick={handleSendMessage} 
+                      size="sm"
+                      disabled={isTyping}
+                      className="h-9 w-9 md:h-10 md:w-10 p-0"
+                    >
+                      {isTyping ? (
+                        <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-3 w-3 md:h-4 md:w-4" />
+                      )}
                     </Button>
                   </div>
                   
-                  {/* Quick Actions */}
+                  {/* Quick Actions - Responsive */}
                   <div className="flex flex-wrap gap-1 mt-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setInputValue('Show high priority complaints')}
-                      className="text-xs h-6"
+                      className="text-xs h-5 md:h-6 px-2"
                     >
-                      🔥 Priority Filter
+                      🔥 Priority
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setInputValue('Summarize recent complaints')}
-                      className="text-xs h-6"
+                      className="text-xs h-5 md:h-6 px-2"
                     >
-                      📋 Summarize
+                      📋 Summary
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setInputValue('Help me with navigation')}
-                      className="text-xs h-6"
+                      className="text-xs h-5 md:h-6 px-2"
                     >
                       ❓ Help
                     </Button>

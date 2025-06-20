@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Download } from 'lucide-react';
+import { Search, Filter, Download, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,6 +23,7 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const filteredComplaints = useMemo(() => {
@@ -30,7 +31,8 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
       const matchesSearch = 
         complaint.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         complaint.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        complaint.location.toLowerCase().includes(searchTerm.toLowerCase());
+        complaint.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        complaint.description.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter;
       const matchesCategory = categoryFilter === 'all' || complaint.category === categoryFilter;
@@ -50,11 +52,18 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
     ));
   };
 
-  const handleDownload = () => {
-    toast({
-      title: "Download Started",
-      description: "Complaints report is being generated...",
-    });
+  const handleDownload = async () => {
+    setIsLoading(true);
+    try {
+      // Simulate download process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast({
+        title: "Download Started",
+        description: "Complaints report is being generated...",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const categories = [...new Set(complaints.map(c => c.category))];
@@ -71,92 +80,104 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="space-y-6"
+      className="space-y-4 md:space-y-6"
     >
       {/* Header and Filters */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-        <div>
-          <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
-          <p className="text-muted-foreground">
-            Manage and respond to public service complaints
-          </p>
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold">{getRoleTitle()}</h2>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Manage and respond to public service complaints
+            </p>
+          </div>
+          
+          <Button 
+            onClick={handleDownload} 
+            disabled={isLoading}
+            className="flex items-center space-x-2 w-full md:w-auto"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            <span>{isLoading ? 'Generating...' : 'Export Report'}</span>
+          </Button>
         </div>
-        
-        <Button onClick={handleDownload} className="flex items-center space-x-2">
-          <Download className="h-4 w-4" />
-          <span>Export Report</span>
-        </Button>
-      </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, title, or location..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+        {/* Search and Filters */}
+        <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, title, location, or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Resolved">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full md:w-40">
-            <SelectValue placeholder="All Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="In Progress">In Progress</SelectItem>
-            <SelectItem value="Resolved">Resolved</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
-          <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 md:p-4 rounded-lg">
+          <div className="text-lg md:text-2xl font-bold text-yellow-700 dark:text-yellow-300">
             {complaints.filter(c => c.status === 'Pending').length}
           </div>
-          <div className="text-sm text-yellow-600 dark:text-yellow-400">Pending</div>
+          <div className="text-xs md:text-sm text-yellow-600 dark:text-yellow-400">Pending</div>
         </div>
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-          <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 md:p-4 rounded-lg">
+          <div className="text-lg md:text-2xl font-bold text-blue-700 dark:text-blue-300">
             {complaints.filter(c => c.status === 'In Progress').length}
           </div>
-          <div className="text-sm text-blue-600 dark:text-blue-400">In Progress</div>
+          <div className="text-xs md:text-sm text-blue-600 dark:text-blue-400">In Progress</div>
         </div>
-        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-          <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+        <div className="bg-green-50 dark:bg-green-900/20 p-3 md:p-4 rounded-lg">
+          <div className="text-lg md:text-2xl font-bold text-green-700 dark:text-green-300">
             {complaints.filter(c => c.status === 'Resolved').length}
           </div>
-          <div className="text-sm text-green-600 dark:text-green-400">Resolved</div>
+          <div className="text-xs md:text-sm text-green-600 dark:text-green-400">Resolved</div>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-900/20 p-4 rounded-lg">
-          <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+        <div className="bg-gray-50 dark:bg-gray-900/20 p-3 md:p-4 rounded-lg">
+          <div className="text-lg md:text-2xl font-bold text-gray-700 dark:text-gray-300">
             {complaints.length}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
+          <div className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Total</div>
         </div>
       </div>
 
       {/* Complaints Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {filteredComplaints.map((complaint, index) => (
           <motion.div
             key={complaint.id}
@@ -173,7 +194,7 @@ export function ComplaintsPanel({ role = 'state', district, mandal }: Complaints
       </div>
 
       {filteredComplaints.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-8 md:py-12">
           <p className="text-muted-foreground">No complaints found matching your criteria.</p>
         </div>
       )}

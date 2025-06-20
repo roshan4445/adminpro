@@ -18,7 +18,7 @@ const languages = [
 export function LanguageToggle() {
   const { i18n } = useTranslation();
 
-  const changeLanguage = (languageCode: string) => {
+  const handleLanguageChange = (languageCode: string) => {
     i18n.changeLanguage(languageCode);
   };
 
@@ -36,7 +36,7 @@ export function LanguageToggle() {
         {languages.map((language) => (
           <DropdownMenuItem
             key={language.code}
-            onClick={() => changeLanguage(language.code)}
+            onClick={() => handleLanguageChange(language.code)}
             className={`cursor-pointer ${
               i18n.language === language.code ? 'bg-accent' : ''
             }`}

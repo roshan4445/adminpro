@@ -40,28 +40,28 @@ export function DashboardOverview({ role = 'state', district, mandal }: Dashboar
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="space-y-6"
+      className="space-y-4 md:space-y-6"
     >
       <div>
-        <h2 className="text-2xl font-bold">{getRoleTitle()}</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-xl md:text-2xl font-bold">{getRoleTitle()}</h2>
+        <p className="text-sm md:text-base text-muted-foreground">
           Real-time insights and analytics for civic management
         </p>
       </div>
 
       <StatsCards stats={mockDashboardStats} />
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Weekly Complaint Trends</CardTitle>
+            <CardTitle className="text-base md:text-lg">Weekly Complaint Trends</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250} className="md:h-[300px]">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <XAxis dataKey="name" fontSize={12} />
+                <YAxis fontSize={12} />
                 <Tooltip />
                 <Bar dataKey="complaints" fill="#3b82f6" name="Complaints" />
                 <Bar dataKey="resolved" fill="#10b981" name="Resolved" />
@@ -72,10 +72,10 @@ export function DashboardOverview({ role = 'state', district, mandal }: Dashboar
 
         <Card>
           <CardHeader>
-            <CardTitle>Complaint Categories</CardTitle>
+            <CardTitle className="text-base md:text-lg">Complaint Categories</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250} className="md:h-[300px]">
               <PieChart>
                 <Pie
                   data={categoryData}
@@ -86,6 +86,7 @@ export function DashboardOverview({ role = 'state', district, mandal }: Dashboar
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
+                  fontSize={12}
                 >
                   {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

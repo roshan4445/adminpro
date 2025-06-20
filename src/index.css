@@ -133,17 +133,18 @@ h1 {
   }
 }
 
-/* Custom button hover fixes */
-button:hover {
+/* Enhanced button hover fixes for light mode */
+.light button:hover {
   @apply transition-colors duration-200;
 }
 
-.light button[data-variant="default"]:hover {
+.light button[data-variant="default"]:hover,
+.light .bg-primary:hover {
   @apply bg-gray-800 text-white;
 }
 
 .light button[data-variant="outline"]:hover {
-  @apply bg-gray-50 text-gray-900;
+  @apply bg-gray-50 text-gray-900 border-gray-300;
 }
 
 .light button[data-variant="ghost"]:hover {
@@ -165,4 +166,71 @@ button:hover {
 
 .light .hover\:bg-primary\/90:hover {
   @apply bg-gray-800;
+}
+
+/* Responsive optimizations */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  .grid {
+    @apply gap-3;
+  }
+  
+  .space-y-6 > * + * {
+    @apply mt-4;
+  }
+}
+
+/* Loading animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .loading-shimmer {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200px 100%;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  @apply transition-colors duration-200;
+}
+
+/* Improved focus states */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Better scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
 }

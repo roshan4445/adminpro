@@ -18,6 +18,15 @@ const resources = {
       },
       ai: {
         inputPlaceholder: 'Ask me about complaints, schemes, traffic, or admin tasks...'
+      },
+      common: {
+        loading: 'Loading...',
+        search: 'Search...',
+        filter: 'Filter',
+        export: 'Export',
+        save: 'Save',
+        cancel: 'Cancel',
+        close: 'Close'
       }
     }
   },
@@ -36,6 +45,15 @@ const resources = {
       },
       ai: {
         inputPlaceholder: 'शिकायतों, योजनाओं, ट्रैफिक या प्रशासनिक कार्यों के बारे में पूछें...'
+      },
+      common: {
+        loading: 'लोड हो रहा है...',
+        search: 'खोजें...',
+        filter: 'फ़िल्टर',
+        export: 'निर्यात',
+        save: 'सेव करें',
+        cancel: 'रद्द करें',
+        close: 'बंद करें'
       }
     }
   },
@@ -54,6 +72,15 @@ const resources = {
       },
       ai: {
         inputPlaceholder: 'ఫిర్యాదులు, పథకాలు, ట్రాఫిక్ లేదా అడ్మిన్ పనుల గురించి అడగండి...'
+      },
+      common: {
+        loading: 'లోడ్ అవుతోంది...',
+        search: 'వెతకండి...',
+        filter: 'ఫిల్టర్',
+        export: 'ఎగుమతి',
+        save: 'సేవ్ చేయండి',
+        cancel: 'రద్దు చేయండి',
+        close: 'మూసివేయండి'
       }
     }
   },
@@ -72,6 +99,15 @@ const resources = {
       },
       ai: {
         inputPlaceholder: 'شکایات، اسکیمز، ٹریفک یا ایڈمن کاموں کے بارے میں پوچھیں...'
+      },
+      common: {
+        loading: 'لوڈ ہو رہا ہے...',
+        search: 'تلاش کریں...',
+        filter: 'فلٹر',
+        export: 'برآمد',
+        save: 'محفوظ کریں',
+        cancel: 'منسوخ کریں',
+        close: 'بند کریں'
       }
     }
   }
@@ -86,6 +122,10 @@ i18n
     debug: false,
     interpolation: {
       escapeValue: false,
+    },
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      caches: ['localStorage'],
     },
   });
 
