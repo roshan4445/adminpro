@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, MessageSquare, X, Send, Mic, MicOff, Volume2, Loader2 } from 'lucide-react';
+import { Bot, X, Send, Mic, MicOff, Volume2, Loader2, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslation } from 'react-i18next';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
+import { useToast } from '@/hooks/use-toast';
 
 interface AIAssistantProps {
   role: 'state' | 'district' | 'mandal';
@@ -27,7 +28,9 @@ export function AIAssistant({ role }: AIAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
+  const { t, i18n } = useTranslation();
+  const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { 
@@ -65,66 +68,104 @@ export function AIAssistant({ role }: AIAssistantProps) {
 
   const getWelcomeMessage = () => {
     const roleMessages = {
-      state: "Hello! I'm your State-level Civic Intelligence Assistant. I can help you with complaint analysis, scheme management, traffic coordination, and administrative tasks across all districts.",
-      district: "Hello! I'm your District-level Civic Intelligence Assistant. I can help you manage complaints, coordinate with mandals, analyze traffic patterns, and oversee district schemes.",
-      mandal: "Hello! I'm your Mandal-level Civic Intelligence Assistant. I can help you with local complaints, voice dictation, traffic issues, and daily reporting tasks."
+      state: "🏛️ Hello! I'm your State-level Civic Intelligence Assistant powered by Gemini AI. I can help you with:\n\n• Complaint analysis & prioritization\n• Scheme management across districts\n• Traffic coordination\n• Administrative insights\n• Multi-language support\n\nHow can I assist you today?",
+      district: "🏙️ Hello! I'm your District-level Civic Intelligence Assistant powered by Gemini AI. I can help you with:\n\n• District complaint management\n• Mandal coordination\n• Traffic pattern analysis\n• Scheme oversight\n• Administrative guidance\n\nWhat would you like to know?",
+      mandal: "🏘️ Hello! I'm your Mandal-level Civic Intelligence Assistant powered by Gemini AI. I can help you with:\n\n• Local complaint handling\n• Voice complaint processing\n• Traffic issue reporting\n• Daily activity logs\n• Community assistance\n\nHow can I help you today?"
     };
     return roleMessages[role];
   };
 
-  const getAIResponse = async (userMessage: string): Promise<string> => {
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+  const callGeminiAPI = async (userMessage: string): Promise<string> => {
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyArEUNEuoe_eGJ2WqW_No-UJB2VJN7oIO4";
     
-    const lowerMessage = userMessage.toLowerCase();
-    
-    // Smart filtering suggestions
-    if (lowerMessage.includes('filter') || lowerMessage.includes('priority')) {
-      return "I recommend filtering complaints by:\n\n🔥 **High Priority**: Water supply issues in dense areas\n📍 **Location**: Focus on complaints within 5km radius\n⏰ **Time**: Issues pending more than 3 days\n📊 **Category**: Sanitation (weight: 0.9) > Infrastructure (0.7) > Roads (0.5)\n\nWould you like me to apply these filters automatically?";
+    const currentLanguage = i18n.language === 'en' ? 'English' : 
+                           i18n.language === 'hi' ? 'Hindi' : 
+                           i18n.language === 'te' ? 'Telugu' : 
+                           i18n.language === 'ur' ? 'Urdu' : 'English';
+
+    const prompt = `
+You are an AI assistant for a Smart Civic Intelligence System serving ${role.toUpperCase()} level administration.
+
+🎯 CONTEXT:
+- User Role: ${role.toUpperCase()} Admin
+- Current Language: ${currentLanguage}
+- System: Smart Civic Intelligence Platform
+- Platform Features: Complaint Management, Scheme Administration, Traffic Monitoring, Elderly Skills Program, Scam Alert System
+
+🎯 YOUR CAPABILITIES:
+1. **Complaint Analysis**: Help prioritize, categorize, and suggest actions for citizen complaints
+2. **Scheme Management**: Assist with eligibility verification, application processing, and scheme recommendations
+3. **Traffic Intelligence**: Analyze traffic patterns, suggest infrastructure improvements, coordinate with departments
+4. **Administrative Guidance**: Provide insights on civic management, policy implementation, and resource allocation
+5. **Data Insights**: Generate summaries, identify trends, and provide actionable recommendations
+6. **Multilingual Support**: Communicate in English, Hindi, Telugu, and Urdu
+
+🎯 RESPONSE GUIDELINES:
+- Respond in ${currentLanguage} language
+- Be professional, helpful, and civic-focused
+- Provide actionable insights and specific recommendations
+- Use relevant emojis to enhance readability
+- Keep responses concise but comprehensive
+- If asked about specific data, provide realistic examples
+- Suggest practical next steps when appropriate
+
+📩 USER MESSAGE: "${userMessage}"
+
+📤 RESPONSE:
+Provide a helpful, professional response as a civic intelligence AI assistant. Focus on practical solutions and actionable advice for ${role} level administration.`;
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
+          },
+        ],
+      }),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        return data.candidates[0].content.parts[0].text;
+      } else {
+        throw new Error('Invalid response format from Gemini API');
+      }
+    } catch (error) {
+      console.error('Gemini API Error:', error);
+      
+      // Provide intelligent fallback responses based on user input
+      const lowerMessage = userMessage.toLowerCase();
+      
+      if (lowerMessage.includes('complaint') || lowerMessage.includes('issue')) {
+        return `🔍 **Complaint Management Assistance**\n\nI'm currently experiencing connectivity issues, but I can still help you with complaint management:\n\n• **High Priority**: Water supply, safety hazards, traffic emergencies\n• **Medium Priority**: Infrastructure issues, sanitation problems\n• **Low Priority**: Aesthetic concerns, minor inconveniences\n\n**Quick Actions:**\n✅ Filter complaints by severity\n✅ Assign to appropriate departments\n✅ Set up automated responses\n\nPlease try your question again, and I'll provide more detailed assistance.`;
+      }
+      
+      if (lowerMessage.includes('scheme') || lowerMessage.includes('eligibility')) {
+        return `📋 **Scheme Management Support**\n\nConnection issue detected, but here's immediate guidance:\n\n**Common Eligibility Criteria:**\n• Income limits (usually ₹3L-8L annually)\n• Age requirements (varies by scheme)\n• Documentation (Aadhar, income certificate)\n• Residency proof\n\n**Quick Verification Steps:**\n✅ Check income against scheme limits\n✅ Verify age criteria\n✅ Confirm document completeness\n\nPlease retry your query for more specific assistance.`;
+      }
+      
+      return `⚠️ **Temporary Connectivity Issue**\n\nI'm experiencing technical difficulties connecting to my AI services, but I'm still here to help!\n\n**Available Assistance:**\n🔍 Complaint filtering and prioritization\n📊 Scheme eligibility guidance\n🚦 Traffic management suggestions\n📈 Administrative best practices\n\n**Quick Tips for ${role.toUpperCase()} Admin:**\n• Review pending high-priority complaints\n• Check scheme application deadlines\n• Monitor traffic incident reports\n• Update administrative logs\n\nPlease try your question again - my connection should restore shortly!`;
     }
-    
-    // Complaint summarization
-    if (lowerMessage.includes('summarize') || lowerMessage.includes('summary')) {
-      return "📋 **Complaint Summary Generated**\n\n**English**: Water supply disruption affecting 50+ households in Sector 15 for 3 days.\n\n**हिंदी**: सेक्टर 15 में 50+ घरों में 3 दिनों से पानी की आपूर्ति बाधित।\n\n**తెలుగు**: సెక్టర్ 15లో 50+ ఇళ్లకు 3 రోజులుగా నీటి సరఫరా ఆటంకం.\n\n**اردو**: سیکٹر 15 میں 50+ گھروں میں 3 دنوں سے پانی کی فراہمی میں خلل۔";
-    }
-    
-    // Scheme eligibility
-    if (lowerMessage.includes('scheme') || lowerMessage.includes('eligibility')) {
-      return "🎯 **Scheme Eligibility Analysis**\n\n✅ **PM Awas Yojana**: Income < ₹3L, Age 21-55\n✅ **Digital India**: Any age, Basic computer skills\n✅ **Skill Development**: Age 18-45, Unemployed\n\nFor detailed eligibility criteria, I can check specific applicant profiles. Would you like me to analyze any pending applications?";
-    }
-    
-    // Traffic management
-    if (lowerMessage.includes('traffic') || lowerMessage.includes('road')) {
-      return "🚦 **Traffic Intelligence Report**\n\n📍 **Hotspots**: MG Road Junction (15 complaints)\n⚠️ **Critical**: NH-44 pothole causing accidents\n🔧 **Assignments**: 3 issues pending with Highway Dept\n\nRecommendation: Prioritize traffic light repair at MG Road - high congestion area affecting 10,000+ daily commuters.";
-    }
-    
-    // Voice assistance for mandal
-    if (role === 'mandal' && (lowerMessage.includes('voice') || lowerMessage.includes('dictate'))) {
-      return "🎤 **Voice Assistant Ready**\n\nI can help you with:\n• Voice-to-text complaint recording\n• Multilingual dictation (Telugu, Hindi, English, Urdu)\n• Real-time translation\n• Audio complaint playback\n\nClick the microphone button to start voice dictation, or say 'Start recording complaint' to begin.";
-    }
-    
-    // General help
-    if (lowerMessage.includes('help') || lowerMessage.includes('guide')) {
-      const roleHelp = {
-        state: "🏛️ **State Admin Features**:\n• View all district complaints\n• Analyze state-wide trends\n• Manage inter-district schemes\n• Export comprehensive reports\n• Monitor scam alerts\n• Coordinate traffic management",
-        district: "🏙️ **District Admin Features**:\n• Manage district complaints\n• Coordinate with mandals\n• Approve district schemes\n• Monitor traffic patterns\n• Handle scam verifications\n• Generate district reports",
-        mandal: "🏘️ **Mandal Admin Features**:\n• Handle local complaints\n• Voice complaint recording\n• Quick traffic reporting\n• Daily activity logs\n• Local scheme applications\n• Community scam alerts"
-      };
-      return roleHelp[role];
-    }
-    
-    // Default responses
-    const responses = [
-      "I understand you're asking about civic management. Could you be more specific about complaints, schemes, traffic issues, or administrative tasks?",
-      "I'm here to help with your civic intelligence needs. Would you like assistance with filtering data, generating reports, or analyzing trends?",
-      "As your AI assistant, I can help with complaint prioritization, scheme eligibility checks, traffic analysis, or administrative guidance. What would you like to focus on?",
-    ];
-    
-    return responses[Math.floor(Math.random() * responses.length)];
   };
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isLoading) return;
     
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -134,12 +175,14 @@ export function AIAssistant({ role }: AIAssistantProps) {
     };
     
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue('');
     resetTranscript();
     setIsTyping(true);
+    setIsLoading(true);
     
     try {
-      const response = await getAIResponse(inputValue);
+      const response = await callGeminiAPI(currentInput);
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
@@ -150,8 +193,22 @@ export function AIAssistant({ role }: AIAssistantProps) {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('AI response error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: "🔧 I apologize for the technical issue. My AI services are temporarily unavailable, but I'm still here to provide basic civic administration guidance. Please try your question again in a moment.",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "AI Service Issue",
+        description: "Temporary connectivity problem. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsTyping(false);
+      setIsLoading(false);
     }
   };
 
@@ -170,6 +227,13 @@ export function AIAssistant({ role }: AIAssistantProps) {
       speak(text);
     }
   };
+
+  const quickActions = [
+    { text: 'Show high priority complaints', emoji: '🔥', key: 'priority' },
+    { text: 'Summarize recent complaints', emoji: '📋', key: 'summary' },
+    { text: 'Help me with navigation', emoji: '❓', key: 'help' },
+    { text: 'Analyze traffic patterns', emoji: '🚦', key: 'traffic' },
+  ];
 
   return (
     <>
@@ -238,7 +302,10 @@ export function AIAssistant({ role }: AIAssistantProps) {
                     >
                       <Bot className="h-5 w-5" />
                     </motion.div>
-                    <CardTitle className="text-lg">{t('ai.assistant')}</CardTitle>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      AI Assistant
+                      <Sparkles className="h-4 w-4" />
+                    </CardTitle>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs">
@@ -299,10 +366,13 @@ export function AIAssistant({ role }: AIAssistantProps) {
                         className="flex justify-start"
                       >
                         <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-3 rounded-lg">
-                          <div className="flex space-x-1">
-                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" />
-                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                          <div className="flex items-center space-x-2">
+                            <div className="flex space-x-1">
+                              <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" />
+                              <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                              <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                            </div>
+                            <span className="text-xs text-gray-500">Gemini AI is thinking...</span>
                           </div>
                         </div>
                       </motion.div>
@@ -311,71 +381,72 @@ export function AIAssistant({ role }: AIAssistantProps) {
                   </div>
                 </ScrollArea>
                 
-                {/* Input */}
-                <div className="p-3 md:p-4 border-t">
-                  <div className="flex space-x-2">
+                {/* Input Section - Fixed alignment and improved layout */}
+                <div className="p-3 md:p-4 border-t bg-white dark:bg-gray-900 space-y-3">
+                  {/* Main input row */}
+                  <div className="flex items-center space-x-2">
                     <div className="flex-1 relative">
                       <Input
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder={t('ai.inputPlaceholder')}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        className="pr-8 md:pr-10 text-sm"
+                        onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSendMessage()}
+                        className="pr-10 text-sm h-10"
+                        disabled={isLoading}
                       />
                       {isListening && (
-                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-red-500 rounded-full animate-pulse" />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                         </div>
                       )}
                     </div>
+                    
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleVoiceToggle}
-                      className={`${isListening ? 'bg-red-50 border-red-200' : ''} h-9 w-9 md:h-10 md:w-10 p-0`}
+                      className={`${isListening ? 'bg-red-50 border-red-200 text-red-600' : ''} h-10 w-10 p-0 flex-shrink-0`}
+                      disabled={isLoading}
                     >
-                      {isListening ? <MicOff className="h-3 w-3 md:h-4 md:w-4" /> : <Mic className="h-3 w-3 md:h-4 md:w-4" />}
+                      {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     </Button>
+                    
                     <Button 
                       onClick={handleSendMessage} 
                       size="sm"
-                      disabled={isTyping}
-                      className="h-9 w-9 md:h-10 md:w-10 p-0"
+                      disabled={isLoading || !inputValue.trim()}
+                      className="h-10 w-10 p-0 flex-shrink-0"
                     >
-                      {isTyping ? (
-                        <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" />
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Send className="h-3 w-3 md:h-4 md:w-4" />
+                        <Send className="h-4 w-4" />
                       )}
                     </Button>
                   </div>
                   
                   {/* Quick Actions - Responsive */}
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInputValue('Show high priority complaints')}
-                      className="text-xs h-5 md:h-6 px-2"
-                    >
-                      🔥 {t('ai.priority')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInputValue('Summarize recent complaints')}
-                      className="text-xs h-5 md:h-6 px-2"
-                    >
-                      📋 {t('ai.summary')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInputValue('Help me with navigation')}
-                      className="text-xs h-5 md:h-6 px-2"
-                    >
-                      ❓ {t('ai.help')}
-                    </Button>
+                  <div className="flex flex-wrap gap-1">
+                    {quickActions.map((action) => (
+                      <Button
+                        key={action.key}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInputValue(action.text)}
+                        className="text-xs h-6 px-2 flex-shrink-0"
+                        disabled={isLoading}
+                      >
+                        {action.emoji} {action.key === 'priority' ? 'Priority' : action.key === 'summary' ? 'Summary' : action.key === 'help' ? 'Help' : 'Traffic'}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Powered by Gemini */}
+                  <div className="text-center">
+                    <span className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      Powered by Gemini AI
+                    </span>
                   </div>
                 </div>
               </CardContent>
