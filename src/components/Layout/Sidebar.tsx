@@ -56,6 +56,13 @@ export function Sidebar({ activeSection, onSectionChange, role, isMobile = false
     }
   };
 
+  const isActive = (itemId: string) => {
+    if (itemId === 'dashboard') {
+      return activeSection === 'dashboard' || activeSection === '';
+    }
+    return activeSection === itemId;
+  };
+
   if (isMobile) {
     return (
       <>
@@ -93,7 +100,7 @@ export function Sidebar({ activeSection, onSectionChange, role, isMobile = false
                   return (
                     <Button
                       key={item.id}
-                      variant={activeSection === item.id ? "default" : "ghost"}
+                      variant={isActive(item.id) ? "default" : "ghost"}
                       className="w-full justify-start"
                       onClick={() => handleSectionChange(item.id)}
                     >
@@ -142,7 +149,7 @@ export function Sidebar({ activeSection, onSectionChange, role, isMobile = false
           return (
             <Button
               key={item.id}
-              variant={activeSection === item.id ? "default" : "ghost"}
+              variant={isActive(item.id) ? "default" : "ghost"}
               className={cn(
                 "w-full",
                 isCollapsed ? "justify-center px-2" : "justify-start"
