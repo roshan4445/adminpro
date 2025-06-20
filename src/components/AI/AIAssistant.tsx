@@ -24,6 +24,58 @@ interface Message {
   isStructured?: boolean;
 }
 
+// Component to render structured markdown-like content
+const StructuredContent = ({ content }: { content: string }) => {
+  const formatContent = (text: string) => {
+    return text
+      // Headers
+      .replace(/^# (.*$)/gm, '<h1 class="text-lg font-bold text-blue-600 dark:text-blue-400 mb-3 pb-2 border-b border-blue-200 dark:border-blue-800">🎯 $1</h1>')
+      .replace(/^## (.*$)/gm, '<h2 class="text-base font-semibold text-gray-800 dark:text-gray-200 mt-4 mb-2">📋 $1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mt-3 mb-1">▶️ $1</h3>')
+      
+      // Status indicators with colors
+      .replace(/🔴\s*\*\*(.*?)\*\*/g, '<span class="inline-flex items-center gap-1 text-red-600 dark:text-red-400 font-semibold">🔴 $1</span>')
+      .replace(/🟡\s*\*\*(.*?)\*\*/g, '<span class="inline-flex items-center gap-1 text-yellow-600 dark:text-yellow-400 font-semibold">🟡 $1</span>')
+      .replace(/🟢\s*\*\*(.*?)\*\*/g, '<span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-semibold">🟢 $1</span>')
+      .replace(/✅\s*\*\*(.*?)\*\*/g, '<span class="inline-flex items-center gap-1 text-green-700 dark:text-green-300 font-semibold">✅ $1</span>')
+      .replace(/⏳\s*\*\*(.*?)\*\*/g, '<span class="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold">⏳ $1</span>')
+      
+      // Department and location tags
+      .replace(/🏢\s*\*\*(.*?)\*\*/g, '<span class="inline-flex items-center gap-1 text-purple-600 dark:text-purple-400 font-medium bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded text-xs">🏢 $1</span>')
+      .replace(/📍\s*\*\*(.*?)\*\*/g, '<span class="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded text-xs">📍 $1</span>')
+      
+      // Monetary values
+      .replace(/💰\s*\*\*(.*?)\*\*/g, '<span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-semibold">💰 $1</span>')
+      
+      // Action items
+      .replace(/^•\s*\*\*(.*?)\*\*\s*-\s*(.*$)/gm, '<div class="flex items-start gap-2 my-2"><span class="text-blue-500 mt-1">•</span><div><strong class="text-gray-900 dark:text-gray-100">$1</strong><span class="text-gray-600 dark:text-gray-400 ml-2">- $2</span></div></div>')
+      .replace(/^•\s*\*\*(.*?)\*\*/gm, '<div class="flex items-start gap-2 my-1"><span class="text-blue-500 mt-1">•</span><strong class="text-gray-900 dark:text-gray-100">$1</strong></div>')
+      .replace(/^•\s*(.*$)/gm, '<div class="flex items-start gap-2 my-1"><span class="text-blue-500 mt-1">•</span><span class="text-gray-700 dark:text-gray-300">$1</span></div>')
+      
+      // Regular bold text
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900 dark:text-gray-100">$1</strong>')
+      
+      // Line breaks and paragraphs
+      .replace(/\n\n/g, '</p><p class="mb-2">')
+      .replace(/\n/g, '<br>')
+      
+      // Horizontal rules
+      .replace(/^---$/gm, '<hr class="border-gray-300 dark:border-gray-600 my-4">')
+      
+      // Quick tips and highlights
+      .replace(/💡\s*\*\*(.*?)\*\*:\s*(.*$)/gm, '<div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border-l-4 border-blue-400 my-3"><div class="flex items-start gap-2"><span class="text-blue-600">💡</span><div><strong class="text-blue-800 dark:text-blue-200">$1:</strong><span class="text-blue-700 dark:text-blue-300 ml-2">$2</span></div></div></div>');
+  };
+
+  return (
+    <div 
+      className="structured-content leading-relaxed"
+      dangerouslySetInnerHTML={{ 
+        __html: `<p class="mb-2">${formatContent(content)}</p>` 
+      }} 
+    />
+  );
+};
+
 export function AIAssistant({ role }: AIAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -71,120 +123,82 @@ export function AIAssistant({ role }: AIAssistantProps) {
 
   const getWelcomeMessage = () => {
     const roleMessages = {
-      state: `# 🏛️ State-Level Civic Intelligence Assistant
+      state: `# State-Level Civic Intelligence Assistant
 
 **Powered by Gemini AI** | **Multi-Language Support**
 
-## 🎯 **Core Capabilities**
+## Core Capabilities
 
-### 📊 **Administrative Intelligence**
+### Administrative Intelligence
 • **Complaint Analysis** - Priority assessment, trend identification, resource allocation
 • **Cross-District Coordination** - Inter-district issue management and policy implementation
 • **Performance Analytics** - State-wide metrics, efficiency reports, comparative analysis
 
-### 🏗️ **Strategic Management**
+### Strategic Management
 • **Scheme Oversight** - State-wide program monitoring, budget allocation, impact assessment
 • **Traffic Intelligence** - Highway coordination, infrastructure planning, safety protocols
 • **Resource Optimization** - Department coordination, workflow automation, cost analysis
 
-### 🌐 **Multi-Language Operations**
+### Multi-Language Operations
 • **Real-time Translation** - English, Hindi, Telugu, Urdu
 • **Cultural Context** - Region-specific insights and recommendations
 • **Accessibility** - Voice commands, text-to-speech, adaptive interfaces
 
 ---
 
-**💡 Quick Start:** Try asking about complaint prioritization, scheme performance, or traffic coordination across districts.`,
+💡 **Quick Start**: Try asking about complaint prioritization, scheme performance, or traffic coordination across districts.`,
 
-      district: `# 🏙️ District-Level Civic Intelligence Assistant
+      district: `# District-Level Civic Intelligence Assistant
 
 **Powered by Gemini AI** | **Local Focus & Regional Coordination**
 
-## 🎯 **District Operations Hub**
+## District Operations Hub
 
-### 🏘️ **Local Administration**
+### Local Administration
 • **Mandal Coordination** - Sub-district management, resource distribution, progress tracking
 • **Complaint Resolution** - Local issue prioritization, department assignment, citizen feedback
 • **Community Engagement** - Public outreach, feedback collection, satisfaction monitoring
 
-### 📈 **Performance Management**
+### Performance Management
 • **Scheme Implementation** - District-level program execution, eligibility verification, impact tracking
 • **Traffic Management** - Local road issues, signal coordination, infrastructure maintenance
 • **Data Analytics** - District metrics, trend analysis, predictive insights
 
-### 🤝 **Stakeholder Coordination**
+### Stakeholder Coordination
 • **Inter-Department** - Seamless workflow between municipal, health, education departments
 • **Citizen Services** - Service delivery optimization, complaint resolution, transparency
 • **Emergency Response** - Crisis management, resource mobilization, communication protocols
 
 ---
 
-**💡 Quick Actions:** Ask about mandal performance, local complaint trends, or district scheme status.`,
+💡 **Quick Actions**: Ask about mandal performance, local complaint trends, or district scheme status.`,
 
-      mandal: `# 🏘️ Mandal-Level Civic Intelligence Assistant
+      mandal: `# Mandal-Level Civic Intelligence Assistant
 
 **Powered by Gemini AI** | **Community-Focused & Voice-Enabled**
 
-## 🎯 **Community Service Hub**
+## Community Service Hub
 
-### 👥 **Citizen Services**
+### Citizen Services
 • **Voice Complaint Processing** - Multi-language voice recognition, automatic transcription
 • **Local Issue Resolution** - Immediate response, community-level solutions, follow-up tracking
 • **Elderly Support** - Skill program coordination, work assignment, payment processing
 
-### 🚦 **Local Infrastructure**
+### Local Infrastructure
 • **Traffic Management** - Street-level issues, local road maintenance, safety improvements
 • **Daily Operations** - Routine monitoring, maintenance scheduling, service delivery
 • **Community Feedback** - Real-time citizen input, satisfaction surveys, improvement suggestions
 
-### 📱 **Digital Services**
+### Digital Services
 • **Voice Commands** - Hands-free operation, accessibility features, multi-language support
 • **Mobile Optimization** - Field-ready interface, offline capabilities, quick actions
 • **Real-time Updates** - Instant notifications, status tracking, progress monitoring
 
 ---
 
-**💡 Voice Ready:** Say "Record complaint" or ask about local services, elderly programs, or daily reports.`
+💡 **Voice Ready**: Say "Record complaint" or ask about local services, elderly programs, or daily reports.`
     };
     return roleMessages[role];
-  };
-
-  const formatStructuredResponse = (content: string): string => {
-    // Enhanced formatting for better structure and readability
-    return content
-      // Headers with proper hierarchy
-      .replace(/^# (.*$)/gm, '# 🎯 $1')
-      .replace(/^## (.*$)/gm, '\n## 📋 $1\n')
-      .replace(/^### (.*$)/gm, '\n### ▶️ $1\n')
-      
-      // Enhanced bullet points with better spacing
-      .replace(/^• (.*$)/gm, '  • **$1**')
-      .replace(/^- (.*$)/gm, '  ◦ $1')
-      
-      // Action items and recommendations
-      .replace(/^✅ (.*$)/gm, '\n✅ **Action:** $1')
-      .replace(/^🔥 (.*$)/gm, '\n🔥 **Priority:** $1')
-      .replace(/^📊 (.*$)/gm, '\n📊 **Insight:** $1')
-      .replace(/^💡 (.*$)/gm, '\n💡 **Recommendation:** $1')
-      
-      // Status indicators
-      .replace(/\b(High Priority|Critical|Urgent)\b/g, '🔴 **$1**')
-      .replace(/\b(Medium Priority|Important)\b/g, '🟡 **$1**')
-      .replace(/\b(Low Priority|Minor)\b/g, '🟢 **$1**')
-      .replace(/\b(Completed|Resolved|Success)\b/g, '✅ **$1**')
-      .replace(/\b(Pending|In Progress|Processing)\b/g, '⏳ **$1**')
-      
-      // Department and location formatting
-      .replace(/\b(Water Department|Sanitation Department|Highway Maintenance|Municipal Department|Traffic Police|Electrical Department)\b/g, '🏢 **$1**')
-      .replace(/\b(State|District|Mandal)\b/g, '📍 **$1**')
-      
-      // Numbers and statistics
-      .replace(/(\d+)%/g, '**$1%**')
-      .replace(/₹([\d,]+)/g, '💰 **₹$1**')
-      
-      // Add proper spacing around sections
-      .replace(/\n\n\n+/g, '\n\n')
-      .replace(/^(\s*$\n){2,}/gm, '\n');
   };
 
   const callGeminiAPI = async (userMessage: string): Promise<string> => {
@@ -205,28 +219,28 @@ You are an advanced AI assistant for a Smart Civic Intelligence System serving $
 - Features: Complaint Management, Scheme Administration, Traffic Monitoring, Elderly Skills Program, Scam Alert System
 
 🎯 RESPONSE FORMATTING REQUIREMENTS:
-You MUST structure your responses using this exact format for maximum clarity and professionalism:
+You MUST structure your responses using this EXACT format for maximum clarity and professionalism:
 
-# 🎯 [Main Topic/Title]
+# [Main Topic/Title]
 
-## 📋 [Primary Section]
-### ▶️ [Subsection]
+## [Primary Section]
+### [Subsection]
 • **Key Point 1** - Detailed explanation
 • **Key Point 2** - Detailed explanation
 
-## 📊 [Analysis/Data Section]
-### ▶️ [Specific Analysis]
+## [Analysis/Data Section]
+### [Specific Analysis]
 🔴 **High Priority:** Critical items requiring immediate attention
 🟡 **Medium Priority:** Important items for near-term action  
 🟢 **Low Priority:** Items for future consideration
 
-## 💡 [Recommendations Section]
-### ▶️ [Actionable Steps]
+## [Recommendations Section]
+### [Actionable Steps]
 ✅ **Action 1:** Specific step with clear outcome
 ✅ **Action 2:** Specific step with clear outcome
 ✅ **Action 3:** Specific step with clear outcome
 
-## 🎯 [Next Steps/Summary]
+## [Next Steps/Summary]
 📍 **Immediate Actions:** What to do now
 📍 **Follow-up:** What to monitor
 📍 **Resources:** Who to contact or what tools to use
@@ -238,10 +252,10 @@ You MUST structure your responses using this exact format for maximum clarity an
 - Use specific civic administration terminology
 - Provide actionable, practical recommendations
 - Include relevant statistics or examples when helpful
-- Reference appropriate departments (🏢 Water Department, 🏢 Municipal Corporation, etc.)
-- Use status indicators (✅ Completed, ⏳ Pending, 🔴 Critical)
-- Include monetary amounts with 💰 symbol
-- Add location context with 📍 symbol
+- Reference appropriate departments (🏢 **Water Department**, 🏢 **Municipal Corporation**, etc.)
+- Use status indicators (✅ **Completed**, ⏳ **Pending**, 🔴 **Critical**)
+- Include monetary amounts with 💰 **₹amount** format
+- Add location context with 📍 **Location** format
 
 🎯 EXPERTISE AREAS:
 1. **Complaint Intelligence**: Prioritization algorithms, trend analysis, resource optimization
@@ -253,7 +267,7 @@ You MUST structure your responses using this exact format for maximum clarity an
 📩 USER QUERY: "${userMessage}"
 
 📤 STRUCTURED RESPONSE:
-Provide a comprehensive, well-structured response following the exact formatting guidelines above. Focus on practical solutions and actionable insights for ${role} level administration.`;
+Provide a comprehensive, well-structured response following the exact formatting guidelines above. Focus on practical solutions and actionable insights for ${role} level administration. Use the specified emoji patterns and formatting consistently.`;
 
     const options = {
       method: "POST",
@@ -284,7 +298,7 @@ Provide a comprehensive, well-structured response following the exact formatting
       
       if (data.candidates && data.candidates[0] && data.candidates[0].content) {
         const rawResponse = data.candidates[0].content.parts[0].text;
-        return formatStructuredResponse(rawResponse);
+        return rawResponse; // Return raw response for proper formatting
       } else {
         throw new Error('Invalid response format from Gemini API');
       }
@@ -295,95 +309,92 @@ Provide a comprehensive, well-structured response following the exact formatting
       const lowerMessage = userMessage.toLowerCase();
       
       if (lowerMessage.includes('complaint') || lowerMessage.includes('issue')) {
-        return formatStructuredResponse(`
-# 🎯 Complaint Management Intelligence
+        return `# Complaint Management Intelligence
 
-## 📋 Priority Classification System
-### ▶️ Automated Prioritization
-• **High Priority (🔴)** - Safety hazards, water supply failures, traffic emergencies
-• **Medium Priority (🟡)** - Infrastructure issues, sanitation problems, service delays  
-• **Low Priority (🟢)** - Aesthetic concerns, minor inconveniences, suggestions
+## Priority Classification System
+### Automated Prioritization
+• **High Priority** - Safety hazards, water supply failures, traffic emergencies
+• **Medium Priority** - Infrastructure issues, sanitation problems, service delays  
+• **Low Priority** - Aesthetic concerns, minor inconveniences, suggestions
 
-## 📊 Current Status Overview
-### ▶️ Department Assignment
+## Current Status Overview
+### Department Assignment
 🏢 **Water Department** - 15 active complaints (avg. 2.3 days resolution)
 🏢 **Sanitation Department** - 8 active complaints (avg. 1.8 days resolution)
 🏢 **Highway Maintenance** - 12 active complaints (avg. 4.1 days resolution)
 
-## 💡 Recommended Actions
-### ▶️ Immediate Steps
+## Recommended Actions
+### Immediate Steps
 ✅ **Action 1:** Filter complaints by severity using priority tags
 ✅ **Action 2:** Assign bulk complaints to appropriate departments
 ✅ **Action 3:** Set up automated response templates for common issues
 
-## 🎯 Next Steps
+## Next Steps
 📍 **Immediate:** Review pending high-priority complaints
 📍 **Follow-up:** Monitor department response times
 📍 **Resources:** Use complaint analytics dashboard for trends
 
 ---
-💡 **Quick Tip:** Use voice commands for faster complaint entry and processing.`);
+💡 **Quick Tip:** Use voice commands for faster complaint entry and processing.`;
       }
       
       if (lowerMessage.includes('scheme') || lowerMessage.includes('eligibility')) {
-        return formatStructuredResponse(`
-# 🎯 Scheme Management Intelligence
+        return `# Scheme Management Intelligence
 
-## 📋 Eligibility Verification System
-### ▶️ Automated Screening
+## Eligibility Verification System
+### Automated Screening
 • **Income Verification** - Cross-reference with tax records and employment data
 • **Age Criteria** - Automatic calculation from Aadhar database
 • **Documentation Check** - AI-powered document validation and authenticity
 
-## 📊 Current Scheme Performance
-### ▶️ Active Programs
+## Current Scheme Performance
+### Active Programs
 🟢 **PM Awas Yojana** - 156 applications (78% approval rate)
 🟡 **Digital India Initiative** - 89 applications (65% approval rate)
 🔴 **Skill Development Program** - 234 applications (45% approval rate - needs review)
 
-## 💡 Optimization Recommendations
-### ▶️ Process Improvements
+## Optimization Recommendations
+### Process Improvements
 ✅ **Action 1:** Implement AI-powered eligibility pre-screening
 ✅ **Action 2:** Set up automated document verification
 ✅ **Action 3:** Create scheme recommendation engine for citizens
 
-## 🎯 Performance Metrics
+## Performance Metrics
 📍 **Processing Time:** Average 5.2 days (target: 3 days)
 📍 **Approval Rate:** 67% overall (industry standard: 72%)
 📍 **Citizen Satisfaction:** 4.2/5 (based on feedback surveys)
 
 ---
-💡 **Quick Tip:** Use bulk approval features for pre-verified applications to improve efficiency.`);
+💡 **Quick Tip:** Use bulk approval features for pre-verified applications to improve efficiency.`;
       }
       
-      return formatStructuredResponse(`
-# 🎯 Civic Intelligence Assistant
+      return `# Civic Intelligence Assistant
 
-## 📋 System Status
-### ▶️ Connectivity Notice
+## System Status
+### Connectivity Notice
 ⚠️ **Temporary Service Interruption** - AI services experiencing connectivity issues
 
-## 📊 Available Features
-### ▶️ Core Functions
+## Available Features
+### Core Functions
 • **Complaint Management** - Filtering, prioritization, assignment tools
 • **Scheme Administration** - Eligibility checking, application processing
 • **Traffic Monitoring** - Incident reporting, infrastructure planning
 • **Administrative Tools** - Data export, reporting, analytics
 
-## 💡 Immediate Assistance
-### ▶️ Quick Actions for ${role.toUpperCase()} Admin
+## Immediate Assistance
+### Quick Actions for ${role.toUpperCase()} Admin
 ✅ **Action 1:** Review high-priority pending complaints
 ✅ **Action 2:** Check scheme application deadlines
 ✅ **Action 3:** Monitor traffic incident reports
 ✅ **Action 4:** Update daily administrative logs
 
-## 🎯 System Recovery
+## System Recovery
 📍 **Status:** Attempting to restore AI connectivity
 📍 **ETA:** Service should resume within 2-3 minutes
 📍 **Alternative:** Use manual tools and filters for immediate needs
 
 ---
-💡 **Quick Tip:** Your question will be processed with full AI intelligence once connectivity is restored.`);
+💡 **Quick Tip:** Your question will be processed with full AI intelligence once connectivity is restored.`;
     }
   };
 
@@ -420,19 +431,18 @@ Provide a comprehensive, well-structured response following the exact formatting
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: formatStructuredResponse(`
-# 🔧 Technical Issue
+        content: `# Technical Issue
 
 ## ⚠️ Service Interruption
 AI services are temporarily unavailable, but I'm still here to provide civic administration guidance.
 
-## 💡 Available Support
+## Available Support
 • Manual complaint filtering and prioritization
 • Scheme eligibility guidelines
 • Administrative best practices
 • Department contact information
 
-Please try your question again in a moment for full AI assistance.`),
+Please try your question again in a moment for full AI assistance.`,
         timestamp: new Date(),
         isStructured: true,
       };
@@ -602,11 +612,14 @@ Please try your question again in a moment for full AI assistance.`),
                               : 'bg-gray-50 dark:bg-gray-800 text-foreground border border-gray-200 dark:border-gray-700'
                           }`}
                         >
-                          <div className={`whitespace-pre-wrap text-xs md:text-sm leading-relaxed ${
-                            message.isStructured ? 'structured-content' : ''
-                          }`}>
-                            {message.content}
-                          </div>
+                          {message.type === 'user' ? (
+                            <div className="whitespace-pre-wrap text-xs md:text-sm leading-relaxed">
+                              {message.content}
+                            </div>
+                          ) : (
+                            <StructuredContent content={message.content} />
+                          )}
+                          
                           {message.type === 'assistant' && (
                             <div className="flex items-center gap-2 mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
                               <Button
